@@ -24,6 +24,13 @@ class TriviaTestCase(unittest.TestCase):
             self.db.init_app(self.app)
             # create all tables
             self.db.create_all()
+            
+        self.new_question = {
+            'question': 'What food never gets spoilt',
+            'answer': 'Honey',
+            'category': 1,
+            'difficulty': 3
+        }
     
     def tearDown(self):
         """Executed after reach test"""
@@ -34,21 +41,64 @@ class TriviaTestCase(unittest.TestCase):
     Write at least one test for each test for successful operation and for expected errors.
     """
     def test_getting_all_categories(self):
-        response = self.client().get('/api/categories')
+        response = self.client().get('/categories')
         data = json.loads(response.data)
         
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['success'], True)
         self.assertTrue(len(data['categories']))
         
     def test_method_not_allowed_on_categories(self):
-        response = self.client().post('/api/categories')
+        response = self.client().post('/categories')
         data = json.loads(response.data)
         
         self.assertEqual(response.status_code, 405)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Method Not Allowed')
-
+        
+    def test_get_all_questions(self):
+        response = self.client().get('/questions')
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['totalQuestions'])
+        self.assertTrue(len(data['questions']))
+        self.assertTrue(data['currentCategory'])
+        
+    def test_getting_invalid_questions_page(self):
+        response = self.client().get('/questions?page=1000')
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Resource Not Found')
+        
+    # def test_deleting_question(self):
+    #     response = self.client().delete('/questions/24')
+    #     data = json.loads(response.data)
+        
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(data['id'], 24)
+        
+    def test_deleting_invalid_question(self):
+        response = self.client().delete('/questions/1000')
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Resource Not Found')
+        
+    # def test_adding_new_question(self):
+    #     response = self.client().post('/questions', json=self.new_question)
+        
+    #     self.assertEqual(response.status_code, 200)
+        
+    def test_adding_with_wrong_data(self):
+        response = self.client().post('/questions', json={'question': 'What is your name', 'answer': 'Ladipo'})
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Bad Request')
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
