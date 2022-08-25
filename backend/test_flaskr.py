@@ -72,12 +72,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Resource Not Found')
         
-    # def test_deleting_question(self):
-    #     response = self.client().delete('/questions/33')
-    #     data = json.loads(response.data)
+    def test_deleting_question(self):
+        response = self.client().delete('/questions/32')
+        data = json.loads(response.data)
         
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(data['id'], 33)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['id'], 32)
         
     def test_deleting_invalid_question(self):
         response = self.client().delete('/questions/1000')
@@ -87,10 +87,10 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Resource Not Found')
         
-    # def test_adding_new_question(self):
-    #     response = self.client().post('/questions', json=self.new_question)
+    def test_adding_new_question(self):
+        response = self.client().post('/questions', json=self.new_question)
         
-    #     self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         
     def test_adding_with_wrong_data(self):
         response = self.client().post('/questions', json={'question': 'What is your name', 'answer': 'Ladipo'})
@@ -133,6 +133,22 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Resource Not Found')
+        
+    def test_get_quiz(self):
+        response = self.client().post('/quizzes', json={'quiz_category': 'History', 'previous_questions': [1, 3, 23]})
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['question'])
+        
+    def test_get_quiz_bad_request(self):
+        response = self.client().post('/quizzes', json={'quiz_category': 'History', 'previousQuestions': [1, 3, 23]})
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Bad Request')
+        
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

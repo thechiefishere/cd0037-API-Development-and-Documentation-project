@@ -31,6 +31,14 @@ def paginate_questions(questions, request):
     
     return questions_on_page
 
+def unused_ids(all_ids, previous_ids):
+    unused = []
+    for id in all_ids:
+        if id not in previous_ids:
+            unused.append(id)
+            
+    return unused
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -207,7 +215,6 @@ def create_app(test_config=None):
     def get_questions_by_categories(id):
         try:
             questions = Question.query.filter_by(category=id).all()
-            print('questions for here', questions)
             if len(questions) == 0:
                 abort(404)
                 
@@ -237,6 +244,31 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
+    @app.route('/quizzes', methods=['POST'])
+    def get_quiz():
+        body = request.get_json()
+        print("body", body)
+        if 'quiz_category' not in body or 'previous_questions' not in body:
+            abort(400)
+        category_type = body['quiz_category']
+        previous_questions = body['previous_questions']
+        
+        try:
+            category_id = Category.query.filter_by(type=category_type).first().format()['id']
+            if category_id is None:
+                abort(404)
+            category_questions = Question.query.filter_by(category=category_id).all()
+            formatted_questions_ids = [question.format()['id'] for question in category_questions]
+            unused = unused_ids(formatted_questions_ids, previous_questions)
+            random_id = random.choice(unused)
+            question = Question.query.filter_by(id=random_id).first().format()
+            
+            return jsonify({
+                'question': question
+            })
+            
+        except:
+            pass
 
     """
     @TODO:
