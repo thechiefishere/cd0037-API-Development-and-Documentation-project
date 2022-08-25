@@ -1,5 +1,6 @@
 from calendar import c
 import os
+from unicodedata import category
 from urllib import response
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -20,7 +21,8 @@ def make_categories_object():
         
     return result
 
-def paginate_questions(questions, page=1):
+def paginate_questions(questions, request):
+    page = request.args.get('page', 1, type=int)
     page_start = (page - 1) * QUESTIONS_PER_PAGE
     page_end = page_start + QUESTIONS_PER_PAGE
     
@@ -80,17 +82,16 @@ def create_app(test_config=None):
     """
     @app.route('/questions')
     def get_all_questions():
-        page = request.args.get('page', 1, type=int)
         try:
             questions = Question.query.order_by(Question.id).all()
-            paginated_questions = paginate_questions(questions, page)
+            paginated_questions = paginate_questions(questions, request)
             if len(paginated_questions) == 0:
                 abort(404)
             current_category = Category.query.first().format()['type']
             
             return jsonify({
                 'questions': paginated_questions,
-                'totalQuestions': len(questions),
+                'totalQuestions': len(paginated_questions),
                 'currentCategory': current_category,
                 'categories': make_categories_object()
             })      
@@ -131,25 +132,7 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
-    @app.route('/questions', methods={'POST'})
-    def post_new_question():
-        body = request.get_json()
-        expected_body_keys = ['question', 'answer', 'category', 'difficulty']
-        for key in expected_body_keys:
-            if key not in body:
-                abort(400)
-        try:
-            question = Question(question=body['question'], answer=body['answer'], difficulty=body['difficulty'], category=body['category'])
-            if not question:
-                abort(422)
-            question.insert()
-            
-            return jsonify({})
-        except Exception as e:
-            if isinstance(e, HTTPException):
-                abort(e.code)
-            abort(422)
-
+    
     """
     @TODO:
     Create a POST endpoint to get questions based on a search term.
@@ -160,6 +143,57 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
+    
+    @app.route('/questions', methods={'POST'})
+    def post_new_question():
+        body = request.get_json()
+        question_post = False
+        search_post = False
+        if 'searchTerm' in body:
+            search_post = True
+        
+        if not(search_post):
+            expected_body_keys = ['question', 'answer', 'category', 'difficulty']
+            keys_in_body = 0
+            for key in expected_body_keys:
+                if key in body:
+                    keys_in_body = keys_in_body + 1
+            if keys_in_body == 4:
+                question_post = True
+                
+        if not(question_post) and not(search_post):
+            abort(400)
+            
+        if search_post:
+            try:
+                questions_with_search_term = Question.query.filter(Question.question.ilike('%' + body['searchTerm'] + '%')).all()
+                # formatted_questions = [question.format() for question in questions_with_search_term]
+                paginated_questions = paginate_questions(questions_with_search_term, request)
+                category_id = paginated_questions[0]['category']
+                category = Category.query.filter_by(id=category_id).first().format()
+                
+                return jsonify({
+                    'questions': paginated_questions,
+                    'totalQuestions': len(paginated_questions),
+                    'currentCategory': category['type']
+                })
+            except Exception as e:
+                if isinstance(e, HTTPException):
+                    abort(e.code)
+                abort(422)
+        
+        if question_post:     
+            try:
+                question = Question(question=body['question'], answer=body['answer'], difficulty=body['difficulty'], category=body['category'])
+                if not question:
+                    abort(422)
+                question.insert()
+                
+                return jsonify({})
+            except Exception as e:
+                if isinstance(e, HTTPException):
+                    abort(e.code)
+                abort(422)
 
     """
     @TODO:
@@ -169,6 +203,28 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
+    @app.route('/categories/<int:id>/questions')
+    def get_questions_by_categories(id):
+        try:
+            questions = Question.query.filter_by(category=id).all()
+            print('questions for here', questions)
+            if len(questions) == 0:
+                abort(404)
+                
+            paginated_questions = paginate_questions(questions, request)
+            category_id = paginated_questions[0]['category']
+            category = Category.query.filter_by(id=category_id).first().format()
+            
+            return jsonify({
+                'questions': paginated_questions,
+                'totalQuestions': len(paginated_questions),
+                'currentCategory': category['type']
+            })
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                abort(e.code)
+            abort(422)
+            
 
     """
     @TODO:
