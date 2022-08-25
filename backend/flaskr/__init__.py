@@ -99,8 +99,8 @@ def create_app(test_config=None):
             
             return jsonify({
                 'questions': paginated_questions,
-                'totalQuestions': len(paginated_questions),
-                'currentCategory': current_category,
+                'total_questions': len(questions),
+                'current_category': current_category,
                 'categories': make_categories_object()
             })      
         except:
@@ -175,15 +175,14 @@ def create_app(test_config=None):
         if search_post:
             try:
                 questions_with_search_term = Question.query.filter(Question.question.ilike('%' + body['searchTerm'] + '%')).all()
-                # formatted_questions = [question.format() for question in questions_with_search_term]
                 paginated_questions = paginate_questions(questions_with_search_term, request)
                 category_id = paginated_questions[0]['category']
                 category = Category.query.filter_by(id=category_id).first().format()
                 
                 return jsonify({
                     'questions': paginated_questions,
-                    'totalQuestions': len(paginated_questions),
-                    'currentCategory': category['type']
+                    'total_questions': len(questions_with_search_term),
+                    'current_category': category['type']
                 })
             except Exception as e:
                 if isinstance(e, HTTPException):
@@ -224,8 +223,8 @@ def create_app(test_config=None):
             
             return jsonify({
                 'questions': paginated_questions,
-                'totalQuestions': len(paginated_questions),
-                'currentCategory': category['type']
+                'total_questions': len(questions),
+                'current_category': category['type']
             })
         except Exception as e:
             if isinstance(e, HTTPException):
@@ -250,12 +249,12 @@ def create_app(test_config=None):
         print("body", body)
         if 'quiz_category' not in body or 'previous_questions' not in body:
             abort(400)
-        category_type = body['quiz_category']
+        category_id = body['quiz_category']['id']
         previous_questions = body['previous_questions']
         
         try:
-            category_id = Category.query.filter_by(type=category_type).first().format()['id']
-            if category_id is None:
+            category = Category.query.filter_by(id=category_id).first()
+            if category is None:
                 abort(404)
             category_questions = Question.query.filter_by(category=category_id).all()
             formatted_questions_ids = [question.format()['id'] for question in category_questions]
@@ -267,8 +266,11 @@ def create_app(test_config=None):
                 'question': question
             })
             
-        except:
-            pass
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                abort(e.code)
+            abort(404)
+            
 
     """
     @TODO:

@@ -60,9 +60,9 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(response.data)
         
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(data['totalQuestions'])
+        self.assertTrue(data['total_questions'])
         self.assertTrue(len(data['questions']))
-        self.assertTrue(data['currentCategory'])
+        self.assertTrue(data['current_category'])
         
     def test_getting_invalid_questions_page(self):
         response = self.client().get('/questions?page=1000')
@@ -73,11 +73,11 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Resource Not Found')
         
     def test_deleting_question(self):
-        response = self.client().delete('/questions/32')
+        response = self.client().delete('/questions/36')
         data = json.loads(response.data)
         
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['id'], 32)
+        self.assertEqual(data['id'], 36)
         
     def test_deleting_invalid_question(self):
         response = self.client().delete('/questions/1000')
@@ -106,8 +106,8 @@ class TriviaTestCase(unittest.TestCase):
         
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(data['questions']))
-        self.assertTrue(data['totalQuestions'])
-        self.assertTrue(data['currentCategory'])
+        self.assertTrue(data['total_questions'])
+        self.assertTrue(data['current_category'])
         
     def test_searching_question_with_wrong_key(self):
         response = self.client().post('/questions', json={'search_term': 'What'})
@@ -123,8 +123,8 @@ class TriviaTestCase(unittest.TestCase):
         
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(data['questions']))
-        self.assertTrue(data['totalQuestions'])
-        self.assertTrue(data['currentCategory'])
+        self.assertTrue(data['total_questions'])
+        self.assertTrue(data['current_category'])
         
     def test_not_found_error_for_getting_questions_by_categories(self):
         response = self.client().get('/categories/1000/questions')
@@ -135,7 +135,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Resource Not Found')
         
     def test_get_quiz(self):
-        response = self.client().post('/quizzes', json={'quiz_category': 'History', 'previous_questions': [1, 3, 23]})
+        response = self.client().post('/quizzes', json={'quiz_category': {'id': 4, 'type': 'History'}, 'previous_questions': [1, 3, 23]})
         data = json.loads(response.data)
         
         self.assertEqual(response.status_code, 200)

@@ -62,6 +62,7 @@ class QuizView extends Component {
       },
       crossDomain: true,
       success: (result) => {
+        console.log('result', result);
         this.setState({
           showAnswer: false,
           previousQuestions: previousQuestions,
@@ -72,6 +73,7 @@ class QuizView extends Component {
         return;
       },
       error: (error) => {
+        console.log('error', error);
         alert('Unable to load question. Please try your request again');
         return;
       },

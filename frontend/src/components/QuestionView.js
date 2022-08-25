@@ -115,7 +115,11 @@ class QuestionView extends Component {
           url: `/questions/${id}`, //TODO: update request URL
           type: 'DELETE',
           success: (result) => {
-            this.getQuestions();
+            const { questions } = this.state;
+            const questionsAfterDelete = questions.filter(
+              (question) => question.id !== result.id
+            );
+            this.setState({ ...this.state, questions: questionsAfterDelete });
           },
           error: (error) => {
             alert('Unable to load questions. Please try your request again');
