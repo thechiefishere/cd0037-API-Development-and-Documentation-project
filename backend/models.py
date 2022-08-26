@@ -1,3 +1,4 @@
+from email.policy import default
 import os
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
@@ -18,6 +19,13 @@ def setup_db(app, database_path=database_path):
     db.app = app
     db.init_app(app)
     db.create_all()
+
+
+"""user_question"""
+user_question = db.Table('user_question',
+                         Column('user_id', Integer, db.ForeignKey('user.id')),
+                         Column('question_id', Integer, db.ForeignKey('question.id'))
+                        )
 
 """
 Question
@@ -75,4 +83,40 @@ class Category(db.Model):
         return {
             'id': self.id,
             'type': self.type
+            }
+
+"""
+User
+
+"""
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String, nullable=False)
+    password = Column(String, nullable=False)
+    score = Column(Integer, nullable=False, default=0)
+    questions = db.relationship('Question', secondary=user_question, bakcref='users')
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def format(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'password': self.password,
+            'score': self.score,
             }
