@@ -176,6 +176,12 @@ def create_app(test_config=None):
             try:
                 questions_with_search_term = Question.query.filter(Question.question.ilike('%' + body['searchTerm'] + '%')).all()
                 paginated_questions = paginate_questions(questions_with_search_term, request)
+                if len(questions_with_search_term) == 0:
+                    return jsonify({
+                    'questions': [],
+                    'total_questions': 0,
+                    'current_category': ""
+                })
                 category_id = paginated_questions[0]['category']
                 category = Category.query.filter_by(id=category_id).first().format()
                 

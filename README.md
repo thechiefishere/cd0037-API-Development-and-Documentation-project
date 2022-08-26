@@ -1,49 +1,366 @@
-# API Development and Documentation Final Project
+# TRIVIA
 
-## Trivia App
+Trivia api is a game api where you can fetch questions based on any category to
+create a "trivial game".
+You can fetch for all the questions, you can as well fetch for a single
+question by providing the 'id' of the question.
+Each question returns the question, answer to the question, the category
+the question belongs to, and the rating of the question.
+You can design a frontend of your choice to consume the data coming from
+the api or you can use the frontend provided with the api.
 
-Udacity is invested in creating bonding experiences for its employees and students. A bunch of team members got the idea to hold trivia on a regular basis and created a webpage to manage the trivia app and play the game, but their API experience is limited and still needs to be built out.
+## Getting Started
 
-That's where you come in! Help them finish the trivia app so they can start holding trivia and seeing who's the most knowledgeable of the bunch. The application must:
+### Pre-requisites and Local Development
 
-1. Display questions - both all questions and by category. Questions should show the question, category and difficulty rating by default and can show/hide the answer.
-2. Delete questions.
-3. Add questions and require that they include question and answer text.
-4. Search for questions based on a text query string.
-5. Play the quiz game, randomizing either all questions or within a specific category.
-
-Completing this trivia app will give you the ability to structure plan, implement, and test an API - skills essential for enabling your future applications to communicate with others.
-
-## Starting and Submitting the Project
-
-[Fork](https://help.github.com/en/articles/fork-a-repo) the project repository and [clone](https://help.github.com/en/articles/cloning-a-repository) your forked repository to your machine. Work on the project locally and make sure to push all your changes to the remote repository before submitting the link to your repository in the Classroom.
-
-## About the Stack
-
-We started the full stack application for you. It is designed with some key functional areas:
+Developers using this project should already have Python3, pip and node
+installed on their local machines.
 
 ### Backend
 
-The [backend](./backend/README.md) directory contains a partially completed Flask and SQLAlchemy server. You will work primarily in `__init__.py` to define your endpoints and can reference models.py for DB and SQLAlchemy setup. These are the files you'd want to edit in the backend:
+From the backend folder run pip install requirements.txt. All required
+packages are included in the requirements file.
 
-1. `backend/flaskr/__init__.py`
-2. `backend/test_flaskr.py`
+To run the application run the following commands:
 
-> View the [Backend README](./backend/README.md) for more details.
+```
+    export FLASK_APP=flaskr
+    export FLASK_ENV=development
+    flask run
+```
 
-### Frontend
+These commands put the application in development and directs our application
+to use the **init**.py file in our flaskr folder. Working in development mode
+shows an interactive debugger in the console and restarts the server whenever
+changes are made. If running locally on Windows, look for the commands in the
+[Flask documentation](https://flask.palletsprojects.com/en/2.2.x/).
 
-The [frontend](./frontend/README.md) directory contains a complete React frontend to consume the data from the Flask server. If you have prior experience building a frontend application, you should feel free to edit the endpoints as you see fit for the backend you design. If you do not have prior experience building a frontend application, you should read through the frontend code before starting and make notes regarding:
+The application is run on http://127.0.0.1:5000/ by default and is a proxy in the frontend configuration.
 
-1. What are the end points and HTTP methods the frontend is expecting to consume?
-2. How are the requests from the frontend formatted? Are they expecting certain parameters or payloads?
+### Tests
 
-Pay special attention to what data the frontend is expecting from each API response to help guide how you format your API. The places where you may change the frontend behavior, and where you should be looking for the above information, are marked with `TODO`. These are the files you'd want to edit in the frontend:
+In order to run tests navigate to the backend folder and run the following commands:
 
-1. `frontend/src/components/QuestionView.js`
-2. `frontend/src/components/FormView.js`
-3. `frontend/src/components/QuizView.js`
+    dropdb trivia_test
+    createdb trivia_test
+    psql trivia_test < questions.psql
+    python test_flaskr.py
 
-By making notes ahead of time, you will practice the core skill of being able to read and understand code and will have a simple plan to follow to build out the endpoints of your backend API.
+The first time you run the tests, omit the dropdb command.
+All tests are kept in that file and should be maintained as updates are made to app functionality.
 
-> View the [Frontend README](./frontend/README.md) for more details.
+## API Reference
+
+### Getting Started
+
+- Base Url: At present this api is hosted locally. The backend app is hosted at the default, http://127.0.0.1:5000/, which is set as a proxy in the frontend configuration.
+- Authentication: The Api does not require authentication of any sort.
+
+### Errors
+
+Errors are returned in json format. The errors are returned with their respective error codes to elaborate on what type of error it is.
+Example error code is showed below:
+
+    {
+        'success': False,
+        'error': 404,
+        'message': 'Not Found'
+    }
+
+The API will return one of the following errors if something goes wrong.
+
+- 400: Bad Request
+- 404: Resource Not Found
+- 422: Not Processable
+- 405: Method Not Allowed
+
+### EndPoints
+
+#### Get all questions
+
+```http
+  GET /questions
+```
+
+- General:  
+  Returns a list of question objects, current category and total number of
+  questions. Results are paginated in groups of 10. Include a request argument
+  to choose page number, starting from 1.
+- curl http://127.0.0.1:5000/questions
+- Sample Response:
+
+```
+  {
+     "questions": [
+        {
+            "answer": "Apollo 13",
+            "category": 5,
+            "difficulty": 4,
+            "id": 2,
+            "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+        },
+        {
+            "answer": "Tom Cruise",
+            "category": 5,
+            "difficulty": 4,
+            "id": 4,
+            "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+        },
+        {
+            "answer": "Maya Angelou",
+            "category": 4,
+            "difficulty": 2,
+            "id": 5,
+            "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+        },
+        {
+            "answer": "Edward Scissorhands",
+            "category": 5,
+            "difficulty": 3,
+            "id": 6,
+            "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+        },
+        {
+            "answer": "Muhammad Ali",
+            "category": 4,
+            "difficulty": 1,
+            "id": 9,
+            "question": "What boxer's original name is Cassius Clay?"
+        },
+        {
+            "answer": "Brazil",
+            "category": 6,
+            "difficulty": 3,
+            "id": 10,
+            "question": "Which is the only team to play in every soccer World Cup tournament?"
+        },
+        {
+            "answer": "Uruguay",
+            "category": 6,
+            "difficulty": 4,
+            "id": 11,
+            "question": "Which country won the first ever soccer World Cup in 1930?"
+        },
+        {
+            "answer": "George Washington Carver",
+            "category": 4,
+            "difficulty": 2,
+            "id": 12,
+            "question": "Who invented Peanut Butter?"
+        },
+        {
+            "answer": "Lake Victoria",
+            "category": 3,
+            "difficulty": 2,
+            "id": 13,
+            "question": "What is the largest lake in Africa?"
+        },
+        {
+            "answer": "The Palace of Versailles",
+            "category": 3,
+            "difficulty": 3,
+            "id": 14,
+            "question": "In which royal palace would you find the Hall of Mirrors?"
+        }
+    ],
+    "categories": {
+        "1": "Science",
+        "2": "Art",
+        "3": "Geography",
+        "4": "History",
+        "5": "Entertainment",
+        "6": "Sports"
+    },
+    "current_category": "Science",
+    "total_questions": 20
+}
+```
+
+#### Post a question
+
+```
+  POST /questions
+```
+
+- General:  
+  Creates a new question using the submitted question, answer, category and
+  difficulty. Returns an empty object.
+- curl http://127.0.0.1:5000/questions?page=3 -X POST
+  -H "Content-Type: application/json"
+  -d '{"question":"How are you doing", "answer":"22", "rating":"1", "category":"3"}'
+
+#### Delete a question by id
+
+```
+  DELETE /questions/{id}
+```
+
+- General:  
+  Deletes the question of the given ID if it exists. Returns the id of the
+  deleted question.
+- curl -X DELETE http://127.0.0.1:5000/questions/35?page=2
+- Sample Response:
+
+```
+{
+    "id": 16
+}
+```
+
+#### Get all categories
+
+    GET /categories
+
+- General:  
+  Returns an object with key 'categories' and value containing an object
+  containing all the categories keys and values.
+- curl http://127.0.0.1:5000/categories
+- Sample Response:
+
+```
+{
+    "categories": {
+        "1": "Science",
+        "2": "Art",
+        "3": "Geography",
+        "4": "History",
+        "5": "Entertainment",
+        "6": "Sports"
+    }
+}
+```
+
+#### Search for question
+
+```
+POST /questions
+```
+
+- General:  
+  Takes a search term in the post body and returns all the questions that
+  have the search term as their substring, total_questions and the current_category.
+- curl -X POST http://127.0.0.1:5000/questions?page=1 -H "Content-Type: application/json" -d '{"searchTerm": "What"}'
+- Sample Response:
+
+```
+{
+  "current_category": "History",
+  "questions": [
+    {
+      "answer": "Muhammad Ali",
+      "category": 4,
+      "difficulty": 1,
+      "id": 9,
+      "question": "What boxer's original name is Cassius Clay?"
+    },
+    {
+      "answer": "Apollo 13",
+      "category": 5,
+      "difficulty": 4,
+      "id": 2,
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    },
+    {
+      "answer": "Tom Cruise",
+      "category": 5,
+      "difficulty": 4,
+      "id": 4,
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    },
+    {
+      "answer": "Edward Scissorhands",
+      "category": 5,
+      "difficulty": 3,
+      "id": 6,
+      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+    },
+    {
+      "answer": "Lake Victoria",
+      "category": 3,
+      "difficulty": 2,
+      "id": 13,
+      "question": "What is the largest lake in Africa?"
+    },
+    {
+      "answer": "Mona Lisa",
+      "category": 2,
+      "difficulty": 3,
+      "id": 17,
+      "question": "La Giaconda is better known as what?"
+    },
+    {
+      "answer": "The Liver",
+      "category": 1,
+      "difficulty": 4,
+      "id": 20,
+      "question": "What is the heaviest organ in the human body?"
+    },
+    {
+      "answer": "Blood",
+      "category": 1,
+      "difficulty": 4,
+      "id": 22,
+      "question": "Hematology is a branch of medicine involving the study of what?"
+    }
+  ],
+  "total_questions": 8
+}
+```
+
+#### Get all questions belonging to a category
+
+    GET /categories/{id}/questions
+
+- General:
+  This endpoint returns all the questions belonging to the category labelled by
+  id. It returns an object containig a list of questions, total_questions
+  and the current category.
+- curl http://127.0.0.1:5000/categories/1/questions
+- Sample Response:
+
+```
+{
+  "current_category": "Science",
+  "questions": [
+    {
+      "answer": "The Liver",
+      "category": 1,
+      "difficulty": 4,
+      "id": 20,
+      "question": "What is the heaviest organ in the human body?"
+    },
+    {
+      "answer": "Alexander Fleming",
+      "category": 1,
+      "difficulty": 3,
+      "id": 21,
+      "question": "Who discovered penicillin?"
+    },
+    {
+      "answer": "Blood",
+      "category": 1,
+      "difficulty": 4,
+      "id": 22,
+      "question": "Hematology is a branch of medicine involving the study of what?"
+    },
+    {
+      "answer": "I don't think so",
+      "category": 1,
+      "difficulty": 1,
+      "id": 32,
+      "question": "Can we meet by 7?"
+    }
+  ],
+  "total_questions": 4
+}
+```
+
+## Authors
+
+- John Toriola
+- Udacity Team
+
+## Acknowledgements
+
+I am extremely grateful to everyone that has participated in my journey as a software developer.
+Thanks and God bless you.
