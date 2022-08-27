@@ -37,6 +37,22 @@ class Header extends Component {
         >
           Play
         </h2>
+        <div className='user'>
+          <h2
+            onClick={() => {
+              this.navTo('/login');
+            }}
+          >
+            Login
+          </h2>
+          <h2
+            onClick={() => {
+              this.navTo('/signup');
+            }}
+          >
+            SignUp
+          </h2>
+        </div>
       </div>
     );
   }

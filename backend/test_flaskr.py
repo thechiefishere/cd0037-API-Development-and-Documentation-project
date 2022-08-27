@@ -1,6 +1,7 @@
 import os
 import unittest
 import json
+from urllib import response
 from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app
@@ -30,6 +31,11 @@ class TriviaTestCase(unittest.TestCase):
             'answer': 'Honey',
             'category': 1,
             'difficulty': 3
+        }
+        
+        self.new_user = {
+            'username': 'kunle',
+            'password': 'kunlesecret'
         }
     
     def tearDown(self):
@@ -72,12 +78,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Resource Not Found')
         
-    def test_deleting_question(self):
-        response = self.client().delete('/questions/39')
-        data = json.loads(response.data)
+    # def test_deleting_question(self):
+    #     response = self.client().delete('/questions/25')
+    #     data = json.loads(response.data)
         
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['id'], 39)
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(data['id'], 25)
         
     def test_deleting_invalid_question(self):
         response = self.client().delete('/questions/1000')
@@ -87,10 +93,10 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Resource Not Found')
         
-    def test_adding_new_question(self):
-        response = self.client().post('/questions', json=self.new_question)
+    # def test_adding_new_question(self):
+    #     response = self.client().post('/questions', json=self.new_question)
         
-        self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(response.status_code, 200)
         
     def test_adding_with_wrong_data(self):
         response = self.client().post('/questions', json={'question': 'What is your name', 'answer': 'Ladipo'})
@@ -142,7 +148,23 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['question'])
         
     def test_get_quiz_bad_request(self):
-        response = self.client().post('/quizzes', json={'quiz_category': 'History', 'previousQuestions': [1, 3, 23]})
+        response = self.client().post('/quizzes', json={'quiz_category': {'id': 4, 'type': 'History'}, 'previousQuestions': [1, 3, 23]})
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Bad Request')
+        
+    def test_adding_new_user(self):
+        response = self.client().post('/users', json=self.new_user)
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['id'], 4)
+        self.assertEqual(data['username'], 'kunle')
+        
+    def test_adding_already_added_user(self):
+        response = self.client().post('/users', json={'username': 'jbaba', 'password': 'secret'})
         data = json.loads(response.data)
         
         self.assertEqual(response.status_code, 400)

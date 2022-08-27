@@ -7,8 +7,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 from werkzeug.exceptions import HTTPException
+from werkzeug import generate_password_hash, check_password_hash
 
-from models import setup_db, Question, Category
+from models import setup_db, Question, Category, User
 
 QUESTIONS_PER_PAGE = 10
 
@@ -219,13 +220,13 @@ def create_app(test_config=None):
     @app.route('/categories/<int:id>/questions')
     def get_questions_by_categories(id):
         try:
-            questions = Question.query.filter_by(category=id).all()
+            questions = Question.query.filter_by(category=str(id)).all()
             if len(questions) == 0:
                 abort(404)
                 
             paginated_questions = paginate_questions(questions, request)
             category_id = paginated_questions[0]['category']
-            category = Category.query.filter_by(id=category_id).first().format()
+            category = Category.query.filter_by(id=str(category_id)).first().format()
             
             return jsonify({
                 'questions': paginated_questions,
@@ -252,7 +253,6 @@ def create_app(test_config=None):
     @app.route('/quizzes', methods=['POST'])
     def get_quiz():
         body = request.get_json()
-        print("body", body)
         if 'quiz_category' not in body or 'previous_questions' not in body:
             abort(400)
         category_id = body['quiz_category']['id']
@@ -262,7 +262,7 @@ def create_app(test_config=None):
             category = Category.query.filter_by(id=category_id).first()
             if category is None:
                 abort(404)
-            category_questions = Question.query.filter_by(category=category_id).all()
+            category_questions = Question.query.filter_by(category=str(category_id)).all()
             formatted_questions_ids = [question.format()['id'] for question in category_questions]
             unused = unused_ids(formatted_questions_ids, previous_questions)
             random_id = random.choice(unused)
@@ -277,6 +277,32 @@ def create_app(test_config=None):
                 abort(e.code)
             abort(404)
             
+    
+    @app.route('/users', methods=['POST'])
+    def add_new_user():
+        body = request.get_json()
+        if 'username' not in body or 'password' not in body:
+            abort(400)
+        try:
+            user = User.query.filter_by(username=body['username']).first()
+            if user:
+                abort(400)
+            hashed_password = generate_password_hash(body['password'])
+            user = User(username=body['username'], password=hashed_password)
+            if not user:
+                abort(422)
+            user.insert()
+            
+            formatted_user = user.format()
+            
+            return jsonify({
+                'id': formatted_user['id'],
+                'username': formatted_user['username']
+            })
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                abort(e.code)
+            abort(422)
 
     """
     @TODO:

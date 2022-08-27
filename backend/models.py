@@ -23,8 +23,8 @@ def setup_db(app, database_path=database_path):
 
 """user_question"""
 user_question = db.Table('user_question',
-                         Column('user_id', Integer, db.ForeignKey('user.id')),
-                         Column('question_id', Integer, db.ForeignKey('question.id'))
+                         Column('user_id', Integer, db.ForeignKey('users.id')),
+                         Column('question_id', Integer, db.ForeignKey('questions.id'))
                         )
 
 """
@@ -96,7 +96,7 @@ class User(db.Model):
     username = Column(String, nullable=False)
     password = Column(String, nullable=False)
     score = Column(Integer, nullable=False, default=0)
-    questions = db.relationship('Question', secondary=user_question, bakcref='users')
+    questions = db.relationship('Question', secondary=user_question, backref='users')
 
     def __init__(self, username, password):
         self.username = username

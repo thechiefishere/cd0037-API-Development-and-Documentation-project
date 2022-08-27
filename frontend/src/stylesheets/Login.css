@@ -1,0 +1,39 @@
+.Login , .SignUp{
+    width: 90%;
+    margin: 20vh auto;
+    border: 1px solid #aaa;
+    border-radius: 10px;
+    background-color: rgb(121, 181, 241);
+}
+
+.Component-Heading {
+    text-align: center;
+}
+
+.Login .Form-Component, .SignUp .Form-Component{
+    font-size: 1.3em;
+    margin: 5px 0px;
+}
+
+.Login input, .SignUp input{
+    font-size: .8em;
+    display: block;
+    outline: none;
+}
+
+.Login-Nav, .SignUp-Nav {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.Login-Nav p:last-of-type, .SignUp-Nav p:last-of-type {
+    color: #fff;
+    margin-left: 15px;
+    margin-top: 0px;
+}
+
+@media (min-width: 500px) {
+    .Login, .SignUp {
+        width: 480px;
+    }
+}

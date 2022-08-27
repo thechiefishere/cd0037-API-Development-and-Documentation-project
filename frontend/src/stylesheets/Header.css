@@ -1,0 +1,10 @@
+.user {
+    display: flex;
+    align-items: center;
+}
+.user h2 {
+    margin-right: 10px;
+}
+.user h2:last-of-type {
+    color: dodgerblue;
+}
