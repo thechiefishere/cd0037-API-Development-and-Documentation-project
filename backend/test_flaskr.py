@@ -34,8 +34,8 @@ class TriviaTestCase(unittest.TestCase):
         }
         
         self.new_user = {
-            'username': 'kunle',
-            'password': 'kunlesecret'
+            'username': 'Laide',
+            'password': 'laidesecret'
         }
     
     def tearDown(self):
@@ -155,13 +155,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Bad Request')
         
-    def test_adding_new_user(self):
-        response = self.client().post('/users', json=self.new_user)
-        data = json.loads(response.data)
+    # def test_adding_new_user(self):
+    #     response = self.client().post('/users', json=self.new_user)
+    #     data = json.loads(response.data)
         
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['id'], 4)
-        self.assertEqual(data['username'], 'kunle')
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(data['id'], 7)
+    #     self.assertEqual(data['username'], 'Laide')
+    #     self.assertTrue(data['token'])
         
     def test_adding_already_added_user(self):
         response = self.client().post('/users', json={'username': 'jbaba', 'password': 'secret'})
@@ -171,6 +172,21 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Bad Request')
         
+    def test_user_login(self):
+        response = self.client().post('/users/login', json={'username': 'jbaba', 'password':'secret'})
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['username'], 'jbaba')
+        self.assertTrue(data['token'])
+        
+    def test_user_wrong_password(self):
+        response = self.client().post('/users/login', json={'username': 'jbaba', 'password':'seet'})
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Unauthorized')
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

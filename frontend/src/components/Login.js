@@ -15,6 +15,15 @@ export default class Login extends Component {
     window.location.href = window.location.origin + uri;
   }
 
+  handleSubmit = async (e) => {
+    e.preventDefault();
+    const { username, password } = this.state;
+    if (!username || !password) {
+      return;
+    }
+    // response = await fetch('http://127.0.0.1:5000/login')
+  };
+
   renderLogin() {
     return (
       <section className='Login-Component'>
@@ -22,7 +31,7 @@ export default class Login extends Component {
           <h1>LOGIN</h1>
           <p>Enter your account details</p>
         </div>
-        <form className='Form'>
+        <form className='Form' onSubmit={(e) => this.handleSubmit(e)}>
           <div className='Form-Component'>
             <label>Username:</label>
             <input
@@ -41,7 +50,7 @@ export default class Login extends Component {
               onChange={(e) => this.setState({ password: e.target.value })}
             />
           </div>
-          <input type='submit' value='Login' />
+          <input type='submit' value='Login' className='Submit-Btn' />
         </form>
         <div className='Login-Nav'>
           <p>Don't have an account?</p>

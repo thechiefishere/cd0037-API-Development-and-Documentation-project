@@ -8,10 +8,14 @@ from flask_cors import CORS
 import random
 from werkzeug.exceptions import HTTPException
 from werkzeug import generate_password_hash, check_password_hash
+import jwt
+import datetime
+from dotenv import load_dotenv
 
 from models import setup_db, Question, Category, User
 
 QUESTIONS_PER_PAGE = 10
+load_dotenv()
 
 def make_categories_object():
     categories = Category.query.all()
@@ -39,6 +43,17 @@ def unused_ids(all_ids, previous_ids):
             unused.append(id)
             
     return unused
+
+def get_token(user):
+    timeLimit= datetime.datetime.utcnow() + datetime.timedelta(minutes=300)
+    token = jwt.encode({'username': user['username'], 'exp': timeLimit}, os.getenv('SECRET_KEY'))
+    
+    return token
+
+def is_correct_password(hashed_password, inputted_password):
+    is_valid = check_password_hash(hashed_password, inputted_password)
+    
+    return is_valid
 
 def create_app(test_config=None):
     # create and configure the app
@@ -289,7 +304,7 @@ def create_app(test_config=None):
                 abort(400)
             hashed_password = generate_password_hash(body['password'])
             user = User(username=body['username'], password=hashed_password)
-            if not user:
+            if user is None:
                 abort(422)
             user.insert()
             
@@ -297,12 +312,40 @@ def create_app(test_config=None):
             
             return jsonify({
                 'id': formatted_user['id'],
-                'username': formatted_user['username']
+                'username': formatted_user['username'],
+                'score': formatted_user['score'],
+                'token': get_token(formatted_user)
             })
         except Exception as e:
             if isinstance(e, HTTPException):
                 abort(e.code)
             abort(422)
+            
+            
+    @app.route('/users/login', methods=['POST'])
+    def login():
+        body = request.get_json()
+        if 'username' not in body or 'password' not in body:
+            abort(400)
+        try:
+            user = User.query.filter_by(username=body['username']).first().format()
+            if user is None:
+                abort(401)
+            is_password_correct = is_correct_password(user['password'], body['password'])
+            if not(is_password_correct):
+                abort(401)
+            
+            return jsonify({
+                'id': user['id'],
+                'username': user['username'],
+                'score': user['score'],
+                'token': get_token(user)
+            })
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                abort(e.code)
+            abort(422)
+            
 
     """
     @TODO:
@@ -340,6 +383,14 @@ def create_app(test_config=None):
             'error': 422,
             'message': 'Unprocessed'
         }), 422
+        
+    @app.errorhandler(401)
+    def unauthorized(error):
+        return jsonify({
+            'success': False,
+            'error': 401,
+            'message': 'Unauthorized'
+        }), 401
 
     return app
 

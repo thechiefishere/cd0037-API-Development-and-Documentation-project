@@ -19,11 +19,19 @@
     font-size: .8em;
     display: block;
     outline: none;
+    width: 100%;
 }
 
 .Login-Nav, .SignUp-Nav {
     text-align: center;
     margin-top: 20px;
+}
+
+.Submit-Btn {
+    width: 40% !important;
+    display: block;
+    margin: 0 auto;
+    margin-top: 10px;
 }
 
 .Login-Nav p:last-of-type, .SignUp-Nav p:last-of-type {

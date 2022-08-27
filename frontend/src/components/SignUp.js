@@ -15,6 +15,15 @@ export default class SignUp extends Component {
     window.location.href = window.location.origin + uri;
   }
 
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const { username, password } = this.state;
+    if (!username || !password) {
+      console.log('No username or password');
+    }
+    console.log(username, password);
+  };
+
   renderSignUp() {
     return (
       <section className='SignUp-Component'>
@@ -22,7 +31,7 @@ export default class SignUp extends Component {
           <h1>SIGNUP</h1>
           <p>Signup to play the best trivia game ever</p>
         </div>
-        <form className='Form'>
+        <form className='Form' onSubmit={(e) => this.handleSubmit(e)}>
           <div className='Form-Component'>
             <label>Username:</label>
             <input
@@ -41,7 +50,7 @@ export default class SignUp extends Component {
               onChange={(e) => this.setState({ password: e.target.value })}
             />
           </div>
-          <input type='submit' value='SignUp' />
+          <input type='submit' value='SignUp' className='Submit-Btn' />
         </form>
         <div className='SignUp-Nav'>
           <p>Already registered?</p>
