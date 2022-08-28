@@ -15,13 +15,27 @@ export default class SignUp extends Component {
     window.location.href = window.location.origin + uri;
   }
 
-  handleSubmit = (e) => {
+  handleSubmit = async (e) => {
     e.preventDefault();
     const { username, password } = this.state;
+    const { setUserDetails } = this.props;
     if (!username || !password) {
-      console.log('No username or password');
+      return;
     }
-    console.log(username, password);
+    const response = await fetch('users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+      }),
+    });
+    const data = await response.json();
+    console.log('data', data);
+    this.setState({ username: '', password: '' });
+    setUserDetails(data);
   };
 
   renderSignUp() {
@@ -36,7 +50,7 @@ export default class SignUp extends Component {
             <label>Username:</label>
             <input
               type='text'
-              placeholder='Enter your username'
+              placeholder='enter username'
               value={this.state.username}
               onChange={(e) => this.setState({ username: e.target.value })}
             />
@@ -45,7 +59,7 @@ export default class SignUp extends Component {
             <label>Password:</label>
             <input
               type='password'
-              placeholder='Enter your password'
+              placeholder='enter password'
               value={this.state.password}
               onChange={(e) => this.setState({ password: e.target.value })}
             />

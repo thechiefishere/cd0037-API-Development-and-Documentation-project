@@ -81,6 +81,7 @@ class QuizView extends Component {
   submitGuess = (event) => {
     event.preventDefault();
     let evaluate = this.evaluateAnswer();
+    console.log('evaluate', evaluate);
     this.setState({
       numCorrect: !evaluate ? this.state.numCorrect : this.state.numCorrect + 1,
       showAnswer: true,

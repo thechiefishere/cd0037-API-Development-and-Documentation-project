@@ -18,10 +18,24 @@ export default class Login extends Component {
   handleSubmit = async (e) => {
     e.preventDefault();
     const { username, password } = this.state;
+    const { setUserDetails } = this.props;
     if (!username || !password) {
       return;
     }
-    // response = await fetch('http://127.0.0.1:5000/login')
+    const response = await fetch('users/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+      }),
+    });
+    const data = await response.json();
+    console.log('data', data);
+    this.setState({ username: '', password: '' });
+    setUserDetails(data);
   };
 
   renderLogin() {
@@ -36,7 +50,7 @@ export default class Login extends Component {
             <label>Username:</label>
             <input
               type='text'
-              placeholder='Enter your username'
+              placeholder='enter your username'
               value={this.state.username}
               onChange={(e) => this.setState({ username: e.target.value })}
             />
@@ -45,7 +59,7 @@ export default class Login extends Component {
             <label>Password:</label>
             <input
               type='password'
-              placeholder='Enter your password'
+              placeholder='enter your password'
               value={this.state.password}
               onChange={(e) => this.setState({ password: e.target.value })}
             />

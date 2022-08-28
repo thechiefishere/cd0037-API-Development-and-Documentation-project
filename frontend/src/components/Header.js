@@ -2,11 +2,35 @@ import React, { Component } from 'react';
 import '../stylesheets/Header.css';
 
 class Header extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      username: '',
+      score: '',
+    };
+  }
+
+  componentDidUpdate() {
+    const { userDetails, loggedIn } = this.props;
+    if (!loggedIn) {
+      return;
+    }
+    const { username, score } = userDetails;
+    const { username: stateName, score: stateScore } = this.state;
+    if (score !== stateScore || username !== stateName) {
+      this.setState({ username, score });
+    }
+  }
+
   navTo(uri) {
     window.location.href = window.location.origin + uri;
   }
 
   render() {
+    const { loggedIn } = this.props;
+    const { username, score } = this.state;
+
     return (
       <div className='App-header'>
         <h1
@@ -37,22 +61,37 @@ class Header extends Component {
         >
           Play
         </h2>
-        <div className='user'>
+        {!loggedIn ? (
+          <div className='user'>
+            <h2
+              onClick={() => {
+                this.navTo('/login');
+              }}
+            >
+              Login
+            </h2>
+            <h2
+              onClick={() => {
+                this.navTo('/signup');
+              }}
+            >
+              SignUp
+            </h2>
+          </div>
+        ) : (
           <h2
             onClick={() => {
-              this.navTo('/login');
+              this.navTo('/logout');
             }}
           >
-            Login
+            Logout
           </h2>
-          <h2
-            onClick={() => {
-              this.navTo('/signup');
-            }}
-          >
-            SignUp
-          </h2>
-        </div>
+        )}
+        {loggedIn && (
+          <p>
+            Hi {username}, your score is {score}
+          </p>
+        )}
       </div>
     );
   }
