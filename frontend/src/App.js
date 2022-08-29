@@ -7,6 +7,7 @@ import Header from './components/Header';
 import QuizView from './components/QuizView';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
+import Profile from './components/Profile';
 
 class App extends Component {
   constructor(props) {
@@ -18,36 +19,70 @@ class App extends Component {
     };
   }
 
-  setUserDetails(data) {
+  componentDidMount() {
+    let loggedIn = localStorage.getItem('loggedIn');
+    if (loggedIn === 'false') {
+      loggedIn = false;
+    }
+    const details = localStorage.getItem('userDetails');
+    this.setState({ loggedIn, userDetails: JSON.parse(details) });
+  }
+
+  setUserDetails(data, loggedIn) {
     const { username, score, token } = data;
     const details = {
       username,
       score,
       token,
     };
-    this.setState({ loggedIn: true, userDetails: details });
+    console.log('token', token);
+    this.setState({ loggedIn, userDetails: details });
+    localStorage.setItem('loggedIn', loggedIn);
+    localStorage.setItem('userDetails', JSON.stringify(details));
   }
 
   render() {
-    console.log('log in app', this.state.loggedIn);
+    const { loggedIn, userDetails } = this.state;
     return (
       <div className='App'>
         <Header
           path
-          loggedIn={this.state.loggedIn}
-          userDetails={this.state.userDetails}
+          loggedIn={loggedIn}
+          userDetails={userDetails}
+          setUserDetails={(data, loggedIn) =>
+            this.setUserDetails(data, loggedIn)
+          }
         />
         <Router>
           <Switch>
             <Route path='/' exact component={QuestionView} />
             <Route path='/add' component={FormView} />
-            <Route path='/play' component={QuizView} />
+            <Route
+              path='/profile'
+              component={() => (
+                <Profile userDetails={userDetails} loggedIn={loggedIn} />
+              )}
+            />
+            <Route
+              path='/play'
+              component={() => (
+                <QuizView
+                  loggedIn={loggedIn}
+                  userDetails={userDetails}
+                  setUserDetails={(data, loggedIn) =>
+                    this.setUserDetails(data, loggedIn)
+                  }
+                />
+              )}
+            />
             <Route
               path='/login'
               component={() => (
                 <Login
-                  loggedIn={this.state.loggedIn}
-                  setUserDetails={(data) => this.setUserDetails(data)}
+                  loggedIn={loggedIn}
+                  setUserDetails={(data, loggedIn) =>
+                    this.setUserDetails(data, loggedIn)
+                  }
                 />
               )}
             />
@@ -55,8 +90,10 @@ class App extends Component {
               path='/signup'
               component={() => (
                 <SignUp
-                  loggedIn={this.state.loggedIn}
-                  setUserDetails={(data) => this.setUserDetails(data)}
+                  loggedIn={loggedIn}
+                  setUserDetails={(data, loggedIn) =>
+                    this.setUserDetails(data, loggedIn)
+                  }
                 />
               )}
             />

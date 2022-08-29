@@ -8,3 +8,11 @@
 .user h2:last-of-type {
     color: dodgerblue;
 }
+
+.Header-ProfileIcon {
+    font-size: 1.3em;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    justify-content: space-between;
+}

@@ -1,0 +1,21 @@
+.Profile {
+    text-align: center;
+    padding-top: 10vh;
+    font-size: 1.3em;
+    background-color: rgb(226, 233, 240);
+    min-height: 77vh;
+}
+.Profile-Icon {
+    font-size: 5em;
+}
+.Profile-Questions {
+    margin-top: 50px;
+}
+
+.Profile li {
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    width: 90%;
+    margin: 10px auto;
+}

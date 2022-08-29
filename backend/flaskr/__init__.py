@@ -12,7 +12,7 @@ import jwt
 import datetime
 from dotenv import load_dotenv
 
-from models import setup_db, Question, Category, User
+from models import setup_db, Question, Category, User, db
 
 QUESTIONS_PER_PAGE = 10
 load_dotenv()
@@ -45,7 +45,7 @@ def unused_ids(all_ids, previous_ids):
     return unused
 
 def get_token(user):
-    timeLimit= datetime.datetime.utcnow() + datetime.timedelta(minutes=300)
+    timeLimit= datetime.datetime.utcnow() + datetime.timedelta(minutes=50)
     token = jwt.encode({'username': user['username'], 'exp': timeLimit}, os.getenv('SECRET_KEY'))
     
     return token
@@ -54,6 +54,19 @@ def is_correct_password(hashed_password, inputted_password):
     is_valid = check_password_hash(hashed_password, inputted_password)
     
     return is_valid
+
+def validate_token(auth):
+    if auth is None or auth.find('Bearer ') == -1:
+        abort(401)
+    token = auth.split(' ')[1]
+    try:
+        decoded_token = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=["HS256"])
+        if decoded_token is None:
+            abort(401)
+    except:
+        abort(401)
+    
+    # return decoded_token
 
 def create_app(test_config=None):
     # create and configure the app
@@ -275,9 +288,13 @@ def create_app(test_config=None):
         
         try:
             category = Category.query.filter_by(id=category_id).first()
-            if category is None:
+            if category is None and category_id != 0:
                 abort(404)
-            category_questions = Question.query.filter_by(category=str(category_id)).all()
+            category_questions = []
+            if category_id == 0:
+                category_questions = Question.query.all()
+            else:
+                category_questions = Question.query.filter_by(category=str(category_id)).all()
             formatted_questions_ids = [question.format()['id'] for question in category_questions]
             unused = unused_ids(formatted_questions_ids, previous_questions)
             random_id = random.choice(unused)
@@ -346,6 +363,58 @@ def create_app(test_config=None):
                 abort(e.code)
             abort(422)
             
+            
+    @app.route('/users/<string:username>', methods=['PATCH'])
+    def update_user_score(username):
+        auth = request.headers['AUTHORIZATION']
+        validate_token(auth)
+        body = request.get_json()
+        if 'question_id' not in body:
+            abort(400)
+            
+        try:
+            user = User.query.filter_by(username=username).first()
+            question = Question.query.filter_by(id=body['question_id']).first()
+            if user is None or question is None:
+                abort(400)
+                
+            formatted_user = user.format()
+            if question not in user.questions:
+                user.score = formatted_user['score'] + 1
+                user.questions.append(question)
+                user.update()
+                            
+            return jsonify({
+                'username': formatted_user['username'],
+                'score': user.score
+            })
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                abort(e.code)
+            abort(422)
+            
+            
+    @app.route('/users/<string:username>')
+    def get_user(username):
+        auth = request.headers['AUTHORIZATION']
+        validate_token(auth)
+        
+        try:
+            # user = User.query.join(Question).filter(User.username==username).first()
+            user = db.session.query(User).filter(User.username==username).first()
+            questions = user.questions
+            formated_questions = [question.format() for question in questions]
+            if user is None:
+                abort(404)
+            return jsonify({
+                'username': user.username,
+                'score': user.score,
+                'answered_questions':formated_questions
+            })
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                abort(e.code)
+            abort(404)
 
     """
     @TODO:

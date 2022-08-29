@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import '../stylesheets/Login.css';
+import { withRouter } from 'react-router-dom';
 
-export default class Login extends Component {
+class Login extends Component {
   constructor(props) {
     super(props);
 
@@ -22,20 +23,24 @@ export default class Login extends Component {
     if (!username || !password) {
       return;
     }
-    const response = await fetch('users/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: username,
-        password: password,
-      }),
-    });
-    const data = await response.json();
-    console.log('data', data);
-    this.setState({ username: '', password: '' });
-    setUserDetails(data);
+    try {
+      const response = await fetch('users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
+      });
+      const data = await response.json();
+      this.setState({ username: '', password: '' });
+      setUserDetails(data, true);
+      this.props.history.push('/');
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   renderLogin() {
@@ -84,3 +89,5 @@ export default class Login extends Component {
     return <div className='Login'>{this.renderLogin()}</div>;
   }
 }
+
+export default withRouter(Login);

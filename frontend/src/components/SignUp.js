@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import '../stylesheets/Login.css';
+import { withRouter } from 'react-router-dom';
 
-export default class SignUp extends Component {
+class SignUp extends Component {
   constructor(props) {
     super(props);
 
@@ -33,9 +34,9 @@ export default class SignUp extends Component {
       }),
     });
     const data = await response.json();
-    console.log('data', data);
     this.setState({ username: '', password: '' });
-    setUserDetails(data);
+    this.props.history.push('/');
+    setUserDetails(data, true);
   };
 
   renderSignUp() {
@@ -84,3 +85,5 @@ export default class SignUp extends Component {
     return <div className='SignUp'>{this.renderSignUp()}</div>;
   }
 }
+
+export default withRouter(SignUp);

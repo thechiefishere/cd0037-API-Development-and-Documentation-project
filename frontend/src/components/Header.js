@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { FaRegUserCircle } from 'react-icons/fa';
+
 import '../stylesheets/Header.css';
 
 class Header extends Component {
@@ -23,13 +25,26 @@ class Header extends Component {
     }
   }
 
+  handleLogout() {
+    const { setUserDetails } = this.props;
+    const data = { username: '', score: '', token: '' };
+    setUserDetails(data, false);
+    window.history.pushState(null, '', '/');
+    window.location.reload();
+  }
+
+  handleProfileClick() {
+    window.history.pushState(null, '', '/profile');
+    window.location.reload();
+  }
+
   navTo(uri) {
     window.location.href = window.location.origin + uri;
   }
 
   render() {
     const { loggedIn } = this.props;
-    const { username, score } = this.state;
+    const { username } = this.state;
 
     return (
       <div className='App-header'>
@@ -61,7 +76,15 @@ class Header extends Component {
         >
           Play
         </h2>
-        {!loggedIn ? (
+        {loggedIn ? (
+          <h2
+            onClick={() => {
+              this.handleLogout();
+            }}
+          >
+            Logout
+          </h2>
+        ) : (
           <div className='user'>
             <h2
               onClick={() => {
@@ -78,19 +101,12 @@ class Header extends Component {
               SignUp
             </h2>
           </div>
-        ) : (
-          <h2
-            onClick={() => {
-              this.navTo('/logout');
-            }}
-          >
-            Logout
-          </h2>
         )}
         {loggedIn && (
-          <p>
-            Hi {username}, your score is {score}
-          </p>
+          <div className='Header-ProfileIcon' onClick={this.handleProfileClick}>
+            {<FaRegUserCircle />}
+            <p>{username}</p>
+          </div>
         )}
       </div>
     );

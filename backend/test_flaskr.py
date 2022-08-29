@@ -187,7 +187,41 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Unauthorized')
-
+        
+    def test_update_user_score(self):
+        response = self.client().patch('/users/jbaba', json={'question_id': 1}, headers={'Authorization': f"Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImpiYWJhIiwiZXhwIjoxNjYxNzU1NzEwfQ.2gGXfrEQZPd1HFtORbhyTjUWdgC-LCEh_RjvxzTWc5M"})
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['username'])
+        self.assertTrue(data['score'])
+        
+    def test_update_score_with_invalid_token(self):
+        response = self.client().patch('/users/jbaba', json={'question_id': 1}, headers={'Authorization': f"Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImpiYWJhIiwiZXhwIjoxNjYxNzU1NzEwfQ.2gGXfrEQZPd1HFtORbhyTjUWdgC-LCEh_RjvxzTWc9N"})
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Unauthorized')
+        
+    def test_getting_a_user(self):
+        response = self.client().get('/users/jbaba', headers={'Authorization': f"Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImpiYWJhIiwiZXhwIjoxNjYxNzU1NzEwfQ.2gGXfrEQZPd1HFtORbhyTjUWdgC-LCEh_RjvxzTWc5M"})
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['username'])
+        self.assertTrue(len(data['answered_questions']))
+        
+    def test_getting_user_with_invalid_token(self):
+        response = self.client().get('/users/jbaba', headers={'Authorization': f"Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImpiYWJhIiwiZXhwIjoxNjYxNzU1NzEwfQ.2gGXfrEQZPd1HFtORbhyTjUWdgC-LCEh_RjvxzTWc9N"})
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Unauthorized')
+        
+        
+        
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()

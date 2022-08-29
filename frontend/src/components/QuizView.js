@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
 import '../stylesheets/QuizView.css';
+import { withRouter } from 'react-router-dom';
 
-const questionsPerPlay = 5;
+const questionsPerPlay = 4;
 
 class QuizView extends Component {
   constructor(props) {
@@ -78,10 +79,34 @@ class QuizView extends Component {
     });
   };
 
-  submitGuess = (event) => {
+  submitGuess = async (event) => {
     event.preventDefault();
     let evaluate = this.evaluateAnswer();
-    console.log('evaluate', evaluate);
+    const { loggedIn, userDetails, setUserDetails } = this.props;
+    if (evaluate && loggedIn) {
+      try {
+        const { username, token } = userDetails;
+        const { currentQuestion } = this.state;
+        const response = await fetch(`/users/${username}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            question_id: currentQuestion.id,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.error && data.error === 401) {
+          const clearedData = { username: '', score: '', token: '' };
+          setUserDetails(clearedData, false);
+          return this.props.history.push('/login');
+        }
+        console.log('am untop setUserDetails');
+      } catch (error) {}
+    }
     this.setState({
       numCorrect: !evaluate ? this.state.numCorrect : this.state.numCorrect + 1,
       showAnswer: true,
@@ -198,4 +223,4 @@ class QuizView extends Component {
   }
 }
 
-export default QuizView;
+export default withRouter(QuizView);
