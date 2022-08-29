@@ -1,104 +1,444 @@
-# Backend - Trivia API
+# TRIVIA
 
-## Setting up the Backend
+Trivia api is a game api where you can fetch questions based on any category to
+create a "trivial game".
+You can fetch for all the questions, you can as well fetch for a single
+question by providing the 'id' of the question.
+Each question returns the question, answer to the question, the category
+the question belongs to, and the rating of the question.
+You can design a frontend of your choice to consume the data coming from
+the api or you can use the frontend provided with the api.
+While using the provided frontend, you can register so that your score and answered
+questions can be stored on the server.
 
-### Install Dependencies
+## Getting Started
 
-1. **Python 3.7** - Follow instructions to install the latest version of python for your platform in the [python docs](https://docs.python.org/3/using/unix.html#getting-and-installing-the-latest-version-of-python)
+### Pre-requisites and Local Development
 
-2. **Virtual Environment** - We recommend working within a virtual environment whenever using Python for projects. This keeps your dependencies for each project separate and organized. Instructions for setting up a virual environment for your platform can be found in the [python docs](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
+Developers using this project should already have Python3, pip and node
+installed on their local machines.
 
-3. **PIP Dependencies** - Once your virtual environment is setup and running, install the required dependencies by navigating to the `/backend` directory and running:
+### Backend
 
-```bash
-pip install -r requirements.txt
+From the backend folder run pip install requirements.txt. All required
+packages are included in the requirements file.
+
+To run the application run the following commands:
+
+```
+    export FLASK_APP=flaskr
+    export FLASK_ENV=development
+    flask run
 ```
 
-#### Key Pip Dependencies
+These commands put the application in development and directs our application
+to use the **init**.py file in our flaskr folder. Working in development mode
+shows an interactive debugger in the console and restarts the server whenever
+changes are made. If running locally on Windows, look for the commands in the
+[Flask documentation](https://flask.palletsprojects.com/en/2.2.x/).
 
-- [Flask](http://flask.pocoo.org/) is a lightweight backend microservices framework. Flask is required to handle requests and responses.
+The application is run on http://127.0.0.1:5000/ by default and is a proxy in the frontend configuration.
 
-- [SQLAlchemy](https://www.sqlalchemy.org/) is the Python SQL toolkit and ORM we'll use to handle the lightweight SQL database. You'll primarily work in `app.py`and can reference `models.py`.
+### Tests
 
-- [Flask-CORS](https://flask-cors.readthedocs.io/en/latest/#) is the extension we'll use to handle cross-origin requests from our frontend server.
+In order to run tests navigate to the backend folder and run the following commands:
 
-### Set up the Database
+    dropdb trivia_test
+    createdb trivia_test
+    psql trivia_test < questions.psql
+    python test_flaskr.py
 
-With Postgres running, create a `trivia` database:
+The first time you run the tests, omit the dropdb command.
+All tests are kept in that file and should be maintained as updates are made to app functionality.
 
-```bash
-createbd trivia
+## API Reference
+
+### Getting Started
+
+- Base Url: At present this api is hosted locally. The backend app is hosted at the default, http://127.0.0.1:5000/, which is set as a proxy in the frontend configuration.
+- Authentication: The Api does not require authentication of any sort.
+
+### Errors
+
+Errors are returned in json format. The errors are returned with their respective error codes to elaborate on what type of error it is.
+Example error code is showed below:
+
+    {
+        'success': False,
+        'error': 404,
+        'message': 'Not Found'
+    }
+
+The API will return one of the following errors if something goes wrong.
+
+- 400: Bad Request
+- 404: Resource Not Found
+- 422: Not Processable
+- 405: Method Not Allowed
+
+### EndPoints
+
+#### Get all questions
+
+```http
+  GET /questions
 ```
 
-Populate the database using the `trivia.psql` file provided. From the `backend` folder in terminal run:
+- General:  
+  Returns a list of question objects, current category and total number of
+  questions. Results are paginated in groups of 10. Include a request argument
+  to choose page number, starting from 1.
+- curl http://127.0.0.1:5000/questions
+- Sample Response:
 
-```bash
-psql trivia < trivia.psql
 ```
-
-### Run the Server
-
-From within the `./src` directory first ensure you are working using your created virtual environment.
-
-To run the server, execute:
-
-```bash
-flask run --reload
-```
-
-The `--reload` flag will detect file changes and restart the server automatically.
-
-## To Do Tasks
-
-These are the files you'd want to edit in the backend:
-
-1. `backend/flaskr/__init__.py`
-2. `backend/test_flaskr.py`
-
-One note before you delve into your tasks: for each endpoint, you are expected to define the endpoint and response data. The frontend will be a plentiful resource because it is set up to expect certain endpoints and response data formats already. You should feel free to specify endpoints in your own way; if you do so, make sure to update the frontend or you will get some unexpected behavior.
-
-1. Use Flask-CORS to enable cross-domain requests and set response headers.
-2. Create an endpoint to handle `GET` requests for questions, including pagination (every 10 questions). This endpoint should return a list of questions, number of total questions, current category, categories.
-3. Create an endpoint to handle `GET` requests for all available categories.
-4. Create an endpoint to `DELETE` a question using a question `ID`.
-5. Create an endpoint to `POST` a new question, which will require the question and answer text, category, and difficulty score.
-6. Create a `POST` endpoint to get questions based on category.
-7. Create a `POST` endpoint to get questions based on a search term. It should return any questions for whom the search term is a substring of the question.
-8. Create a `POST` endpoint to get questions to play the quiz. This endpoint should take a category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions.
-9. Create error handlers for all expected errors including 400, 404, 422, and 500.
-
-## Documenting your Endpoints
-
-You will need to provide detailed documentation of your API endpoints including the URL, request parameters, and the response body. Use the example below as a reference.
-
-### Documentation Example
-
-`GET '/api/v1.0/categories'`
-
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
-- Request Arguments: None
-- Returns: An object with a single key, `categories`, that contains an object of `id: category_string` key: value pairs.
-
-```json
-{
-  "1": "Science",
-  "2": "Art",
-  "3": "Geography",
-  "4": "History",
-  "5": "Entertainment",
-  "6": "Sports"
+  {
+     "questions": [
+        {
+            "answer": "Apollo 13",
+            "category": 5,
+            "difficulty": 4,
+            "id": 2,
+            "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+        },
+        {
+            "answer": "Tom Cruise",
+            "category": 5,
+            "difficulty": 4,
+            "id": 4,
+            "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+        },
+        {
+            "answer": "Maya Angelou",
+            "category": 4,
+            "difficulty": 2,
+            "id": 5,
+            "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+        },
+        {
+            "answer": "Edward Scissorhands",
+            "category": 5,
+            "difficulty": 3,
+            "id": 6,
+            "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+        },
+        {
+            "answer": "Muhammad Ali",
+            "category": 4,
+            "difficulty": 1,
+            "id": 9,
+            "question": "What boxer's original name is Cassius Clay?"
+        },
+        {
+            "answer": "Brazil",
+            "category": 6,
+            "difficulty": 3,
+            "id": 10,
+            "question": "Which is the only team to play in every soccer World Cup tournament?"
+        },
+        {
+            "answer": "Uruguay",
+            "category": 6,
+            "difficulty": 4,
+            "id": 11,
+            "question": "Which country won the first ever soccer World Cup in 1930?"
+        },
+        {
+            "answer": "George Washington Carver",
+            "category": 4,
+            "difficulty": 2,
+            "id": 12,
+            "question": "Who invented Peanut Butter?"
+        },
+        {
+            "answer": "Lake Victoria",
+            "category": 3,
+            "difficulty": 2,
+            "id": 13,
+            "question": "What is the largest lake in Africa?"
+        },
+        {
+            "answer": "The Palace of Versailles",
+            "category": 3,
+            "difficulty": 3,
+            "id": 14,
+            "question": "In which royal palace would you find the Hall of Mirrors?"
+        }
+    ],
+    "categories": {
+        "1": "Science",
+        "2": "Art",
+        "3": "Geography",
+        "4": "History",
+        "5": "Entertainment",
+        "6": "Sports"
+    },
+    "current_category": "Science",
+    "total_questions": 20
 }
 ```
 
-## Testing
+#### Post a question
 
-Write at least one test for the success and at least one error behavior of each endpoint using the unittest library.
-
-To deploy the tests, run
-
-```bash
-dropdb trivia_test
-createdb trivia_test
-psql trivia_test < trivia.psql
-python test_flaskr.py
 ```
+  POST /questions
+```
+
+- General:  
+  Creates a new question using the submitted question, answer, category and
+  difficulty. Returns an empty object.
+- curl http://127.0.0.1:5000/questions?page=3 -X POST
+  -H "Content-Type: application/json"
+  -d '{"question":"How are you doing", "answer":"22", "rating":"1", "category":"3"}'
+
+#### Delete a question by id
+
+```
+  DELETE /questions/{id}
+```
+
+- General:  
+  Deletes the question of the given ID if it exists. Returns the id of the
+  deleted question.
+- curl -X DELETE http://127.0.0.1:5000/questions/35?page=2
+- Sample Response:
+
+```
+{
+    "id": 16
+}
+```
+
+#### Get all categories
+
+    GET /categories
+
+- General:  
+  Returns an object with key 'categories' and value containing an object
+  containing all the categories keys and values.
+- curl http://127.0.0.1:5000/categories
+- Sample Response:
+
+```
+{
+    "categories": {
+        "1": "Science",
+        "2": "Art",
+        "3": "Geography",
+        "4": "History",
+        "5": "Entertainment",
+        "6": "Sports"
+    }
+}
+```
+
+#### Search for question
+
+```
+POST /questions
+```
+
+- General:  
+  Takes a search term in the post body and returns all the questions that
+  have the search term as their substring, total_questions and the current_category.
+- curl -X POST http://127.0.0.1:5000/questions?page=1 -H "Content-Type: application/json" -d '{"searchTerm": "What"}'
+- Sample Response:
+
+```
+{
+  "current_category": "History",
+  "questions": [
+    {
+      "answer": "Muhammad Ali",
+      "category": 4,
+      "difficulty": 1,
+      "id": 9,
+      "question": "What boxer's original name is Cassius Clay?"
+    },
+    {
+      "answer": "Apollo 13",
+      "category": 5,
+      "difficulty": 4,
+      "id": 2,
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    },
+    {
+      "answer": "Tom Cruise",
+      "category": 5,
+      "difficulty": 4,
+      "id": 4,
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    },
+    {
+      "answer": "Edward Scissorhands",
+      "category": 5,
+      "difficulty": 3,
+      "id": 6,
+      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+    },
+    {
+      "answer": "Lake Victoria",
+      "category": 3,
+      "difficulty": 2,
+      "id": 13,
+      "question": "What is the largest lake in Africa?"
+    },
+    {
+      "answer": "Mona Lisa",
+      "category": 2,
+      "difficulty": 3,
+      "id": 17,
+      "question": "La Giaconda is better known as what?"
+    },
+    {
+      "answer": "The Liver",
+      "category": 1,
+      "difficulty": 4,
+      "id": 20,
+      "question": "What is the heaviest organ in the human body?"
+    },
+    {
+      "answer": "Blood",
+      "category": 1,
+      "difficulty": 4,
+      "id": 22,
+      "question": "Hematology is a branch of medicine involving the study of what?"
+    }
+  ],
+  "total_questions": 8
+}
+```
+
+#### Get all questions belonging to a category
+
+    GET /categories/{id}/questions
+
+- General:
+  This endpoint returns all the questions belonging to the category labelled by
+  id. It returns an object containig a list of questions, total_questions
+  and the current category.
+- curl http://127.0.0.1:5000/categories/1/questions
+- Sample Response:
+
+```
+{
+  "current_category": "Science",
+  "questions": [
+    {
+      "answer": "The Liver",
+      "category": 1,
+      "difficulty": 4,
+      "id": 20,
+      "question": "What is the heaviest organ in the human body?"
+    },
+    {
+      "answer": "Alexander Fleming",
+      "category": 1,
+      "difficulty": 3,
+      "id": 21,
+      "question": "Who discovered penicillin?"
+    },
+    {
+      "answer": "Blood",
+      "category": 1,
+      "difficulty": 4,
+      "id": 22,
+      "question": "Hematology is a branch of medicine involving the study of what?"
+    },
+    {
+      "answer": "I don't think so",
+      "category": 1,
+      "difficulty": 1,
+      "id": 32,
+      "question": "Can we meet by 7?"
+    }
+  ],
+  "total_questions": 4
+}
+```
+
+#### Register a user
+
+    POST /users
+
+- General:  
+  Gets user's username and password from request body and adds it to the users
+  list as a new user. The route returns an object containing the user's 'username',
+  his/her score and a token.
+- curl -X POST http://127.0.0.1:5000/users -H "Content-Type: application/json" -d '{"username": "Lola", "password": "lolasecret"}'
+- Sample Response:
+
+```
+{
+  "id": 3,
+  "score": 0,
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IkxvbGEiLCJleHAiOjE2NjE3ODgzODV9.hyZ3Bo4k72-sIbtnEryreLCJvDgiLLXQnkXWep0Mw-c",
+  "username": "Lola"
+}
+```
+
+#### User Login
+
+    POST /users/login
+
+- General:
+  Gets user's username and password from request body, confirms identity of
+  the user and returns an object containing the user's 'username', his/her
+  score and a token if the user exist.
+- curl -X POST http://127.0.0.1:5000/users/login -H "Content-Type: application/json" -d '{"username": "Lola", "password": "lolasecret"}'
+- Sample Response:
+
+```
+{
+  "id": 3,
+  "score": 0,
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IkxvbGEiLCJleHAiOjE2NjE3ODg3ODl9.CZhMqvclxBV4-DJplD4TiehNmIfrWLfTN4N6MDhWpCk",
+  "username": "Lola"
+}
+```
+
+#### Get User
+
+    GET /users/{username}
+
+- General:  
+  Authenticates the user and return the user represented by the specified username. It returns an object
+  containing the user's 'username', the user's score and a list of all the
+  questions the user has answered correctly.
+- curl http://127.0.0.1:5000/users/Lola -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IkxvbGEiLCJleHAiOjE2NjE3ODg3ODl9.CZhMqvclxBV4-DJplD4TiehNmIfrWLfTN4N6MDhWpCk"
+- Sample Response:
+
+```
+{
+  "answered_questions": [],
+  "score": 0,
+  "username": "Lola"
+}
+```
+
+#### Update user's score
+
+    PATCH /users/{username}
+
+- General:  
+  The route takes in question id in the body, user token for authentication and
+  and returns an updated user object containing 'username' and score.
+- curl -X PATCH http://127.0.0.1:5000/users/Lola -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IkxvbGEiLCJleHAiOjE2NjE3OTAwMDN9.NVK6-quQMUfhLfLahLMIXWoZNTlb174of2QYyu0XPL4" -H "Content-Type: application/json" -d '{"question_id": 2}'
+- Sample Respone:
+
+```
+{
+  "score": 1,
+  "username": "Lola"
+}
+```
+
+## Authors
+
+- John Toriola
+- Udacity Team
+
+## Acknowledgements
+
+I am extremely grateful to everyone that has assisted me in my journey to becoming a seasoned software developer.
+Thanks and God bless you.

@@ -78,12 +78,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Resource Not Found')
         
-    # def test_deleting_question(self):
-    #     response = self.client().delete('/questions/25')
-    #     data = json.loads(response.data)
+    def test_deleting_question(self):
+        response = self.client().delete('/questions/25')
+        data = json.loads(response.data)
         
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(data['id'], 25)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['id'], 25)
         
     def test_deleting_invalid_question(self):
         response = self.client().delete('/questions/1000')
@@ -93,10 +93,10 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Resource Not Found')
         
-    # def test_adding_new_question(self):
-    #     response = self.client().post('/questions', json=self.new_question)
+    def test_adding_new_question(self):
+        response = self.client().post('/questions', json=self.new_question)
         
-    #     self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         
     def test_adding_with_wrong_data(self):
         response = self.client().post('/questions', json={'question': 'What is your name', 'answer': 'Ladipo'})
@@ -155,14 +155,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Bad Request')
         
-    # def test_adding_new_user(self):
-    #     response = self.client().post('/users', json=self.new_user)
-    #     data = json.loads(response.data)
+    def test_adding_new_user(self):
+        response = self.client().post('/users', json=self.new_user)
+        data = json.loads(response.data)
         
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(data['id'], 7)
-    #     self.assertEqual(data['username'], 'Laide')
-    #     self.assertTrue(data['token'])
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['id'], 7)
+        self.assertEqual(data['username'], 'Laide')
+        self.assertTrue(data['token'])
         
     def test_adding_already_added_user(self):
         response = self.client().post('/users', json={'username': 'jbaba', 'password': 'secret'})
