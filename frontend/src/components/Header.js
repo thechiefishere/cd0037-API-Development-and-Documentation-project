@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { FaRegUserCircle } from 'react-icons/fa';
 
 import '../stylesheets/Header.css';
 
@@ -104,7 +103,7 @@ class Header extends Component {
         )}
         {loggedIn && (
           <div className='Header-ProfileIcon' onClick={this.handleProfileClick}>
-            {<FaRegUserCircle />}
+            <img src='/profile.svg' alt='profile' className='filter-white' />
             <p>{username}</p>
           </div>
         )}

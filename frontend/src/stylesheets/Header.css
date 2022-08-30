@@ -16,3 +16,7 @@
     cursor: pointer;
     justify-content: space-between;
 }
+
+.filter-white {
+    filter: invert(99%) sepia(0%) saturate(1905%) hue-rotate(257deg) brightness(121%) contrast(100%);
+}
