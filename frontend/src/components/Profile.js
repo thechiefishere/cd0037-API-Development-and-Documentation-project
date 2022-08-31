@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { FaRegUserCircle } from 'react-icons/fa';
 import { withRouter } from 'react-router-dom';
 
 import '../stylesheets/Profile.css';
@@ -41,9 +40,9 @@ export class Profile extends Component {
     return (
       <section className='Profile'>
         <div>
-          <div className='Profile-Icon'>{<FaRegUserCircle />}</div>
-          <p>You are welcome {username}</p>
-          <p>Your score is {score}</p>
+          <img className='Profile-Icon' src='/profile.svg' alt='profile' />
+          <p className='Profile-Name'>You are welcome {username}</p>
+          <p className='Profile-Name'>Your score is {score}</p>
         </div>
         <div className='Profile-Questions'>
           <h3>Answered Questions</h3>

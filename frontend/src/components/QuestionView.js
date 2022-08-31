@@ -84,7 +84,7 @@ class QuestionView extends Component {
 
   submitSearch = (searchTerm) => {
     $.ajax({
-      url: `/questions`, //TODO: update request URL
+      url: `/questions/search`, //TODO: update request URL
       type: 'POST',
       dataType: 'json',
       contentType: 'application/json',
@@ -117,7 +117,7 @@ class QuestionView extends Component {
           success: (result) => {
             const { questions } = this.state;
             const questionsAfterDelete = questions.filter(
-              (question) => question.id !== result.id
+              (question) => question.id !== result.deleted_question_id
             );
             this.setState({ ...this.state, questions: questionsAfterDelete });
           },

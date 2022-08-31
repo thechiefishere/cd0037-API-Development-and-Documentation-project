@@ -6,12 +6,14 @@
     min-height: 77vh;
 }
 .Profile-Icon {
-    font-size: 5em;
+    width: 80px;
 }
 .Profile-Questions {
     margin-top: 50px;
 }
-
+.Profile-Name {
+    text-transform: uppercase;
+}
 .Profile li {
     padding: 10px;
     background-color: #fff;
