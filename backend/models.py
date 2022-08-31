@@ -3,9 +3,16 @@ import os
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
+from dotenv import load_dotenv
 
-database_name = 'trivia'
-database_path = 'postgresql://{}:{}@{}/{}'.format('student', 'student', 'localhost:5432', database_name)
+load_dotenv()
+
+database_name = os.getenv('DB_NAME')
+database_user = os.getenv('DB_USER')
+database_password = os.getenv('DB_PASSWORD')
+database_host = os.getenv('DB_HOST')
+database_path = 'postgresql://{}:{}@{}/{}'.format(
+    database_user, database_password, database_host, database_name)
 
 db = SQLAlchemy()
 
@@ -13,6 +20,8 @@ db = SQLAlchemy()
 setup_db(app)
     binds a flask application and a SQLAlchemy service
 """
+
+
 def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -24,13 +33,16 @@ def setup_db(app, database_path=database_path):
 """user_question"""
 user_question = db.Table('user_question',
                          Column('user_id', Integer, db.ForeignKey('users.id')),
-                         Column('question_id', Integer, db.ForeignKey('questions.id'))
-                        )
+                         Column('question_id', Integer,
+                                db.ForeignKey('questions.id'))
+                         )
 
 """
 Question
 
 """
+
+
 class Question(db.Model):
     __tablename__ = 'questions'
 
@@ -64,12 +76,15 @@ class Question(db.Model):
             'answer': self.answer,
             'category': self.category,
             'difficulty': self.difficulty
-            }
+        }
+
 
 """
 Category
 
 """
+
+
 class Category(db.Model):
     __tablename__ = 'categories'
 
@@ -79,16 +94,23 @@ class Category(db.Model):
     def __init__(self, type):
         self.type = type
 
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
     def format(self):
         return {
             'id': self.id,
             'type': self.type
-            }
+        }
+
 
 """
 User
 
 """
+
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -96,7 +118,8 @@ class User(db.Model):
     username = Column(String, nullable=False)
     password = Column(String, nullable=False)
     score = Column(Integer, nullable=False, default=0)
-    questions = db.relationship('Question', secondary=user_question, backref='users')
+    questions = db.relationship(
+        'Question', secondary=user_question, backref='users')
 
     def __init__(self, username, password):
         self.username = username
@@ -119,4 +142,4 @@ class User(db.Model):
             'username': self.username,
             'password': self.password,
             'score': self.score,
-            }
+        }
