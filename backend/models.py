@@ -115,7 +115,7 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
-    username = Column(String, nullable=False)
+    username = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     score = Column(Integer, nullable=False, default=0)
     questions = db.relationship(
