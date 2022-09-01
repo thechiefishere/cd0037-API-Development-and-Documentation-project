@@ -27,7 +27,7 @@ class TriviaTestCase(unittest.TestCase):
         self.client = self.app.test_client
         self.database_name = database_name
         self.database_path = 'postgresql://{}:{}@{}/{}'.format(
-            database_user, database_password, database_host, 'trivia')
+            database_user, database_password, database_host, self.database_name)
         setup_db(self.app, self.database_path)
 
         # binds the app to the current context
