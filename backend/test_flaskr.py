@@ -27,7 +27,7 @@ class TriviaTestCase(unittest.TestCase):
         self.client = self.app.test_client
         self.database_name = database_name
         self.database_path = 'postgresql://{}:{}@{}/{}'.format(
-            database_user, database_password, database_host, database_name)
+            database_user, database_password, database_host, self.database_name)
         setup_db(self.app, self.database_path)
 
         # binds the app to the current context
@@ -236,7 +236,7 @@ class TriviaTestCase(unittest.TestCase):
         response = self.client().patch(
             '/users/John',
             json={
-                'question_id': 1},
+                'question_id': 24},
             headers={
                 'Authorization': f"Bearer {user_token}"})
         data = json.loads(response.data)
@@ -278,11 +278,11 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Unauthorized')
 
     def test_y_deleting_question(self):
-        response = self.client().delete('/questions/1')
+        response = self.client().delete('/questions/24')
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['deleted_question_id'], 1)
+        self.assertEqual(data['deleted_question_id'], 24)
 
     def test_z_deleting_invalid_question(self):
         response = self.client().delete('/questions/1000')
