@@ -4,6 +4,8 @@ import json
 from urllib import response
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
+import random
+import string
 
 from flaskr import create_app
 from models import setup_db, Question, Category
@@ -18,6 +20,63 @@ database_path = 'postgresql://{}:{}@{}/{}'.format(
     database_user, database_password, database_host, database_name)
 
 
+def generate_user():
+    """Generate a user object"""
+    digits = random.choices(string.digits, k=3)
+    letters = random.choices(string.ascii_uppercase, k=7)
+    sample = random.sample(digits + letters, 10)
+    sample1 = random.sample(digits + letters, 10)
+
+    username = ''.join(sample)
+    password = ''.join(sample1)
+    return {
+        'username': username,
+        'password': password
+    }
+
+
+def generate_question():
+    """Generate a question object"""
+    letters = random.choices(string.ascii_uppercase, k=80)
+    question = random.sample(letters, 50)
+    answer = random.sample(letters, 10)
+    difficulty = random.randint(1, 5)
+    category = random.randint(1, 6)
+
+    return {
+        'question': ''.join(question),
+        'answer': ''.join(answer),
+        'category': category,
+        'difficulty': difficulty
+    }
+
+
+def add_user(self):
+    """Add new user to database"""
+    user = generate_user()
+    response = self.client().post('/users', json=user)
+    data = json.loads(response.data)
+
+    return {
+        'user': user,
+        'response': response,
+        'data': data
+    }
+
+
+def add_question(self):
+    """Add new quesion to database"""
+    question = generate_question()
+    response = self.client().post('/questions', json=question)
+    data = json.loads(response.data)
+
+    return {
+        'user': question,
+        'response': response,
+        'data': data
+    }
+
+
 class TriviaTestCase(unittest.TestCase):
     """This class represents the trivia test case"""
 
@@ -27,7 +86,7 @@ class TriviaTestCase(unittest.TestCase):
         self.client = self.app.test_client
         self.database_name = database_name
         self.database_path = 'postgresql://{}:{}@{}/{}'.format(
-            database_user, database_password, database_host, self.database_name)
+            database_user, database_password, database_host, 'trivia')
         setup_db(self.app, self.database_path)
 
         # binds the app to the current context
@@ -39,13 +98,6 @@ class TriviaTestCase(unittest.TestCase):
 
         self.category = {
             'type': "Science"
-        }
-
-        self.question = {
-            'question': 'What food never gets spoilt',
-            'answer': 'Honey',
-            'category': 1,
-            'difficulty': 3
         }
 
         self.user = {
@@ -91,9 +143,10 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Method Not Allowed')
 
     def test_cd_adding_new_question(self):
-        response = self.client().post('/questions', json=self.question)
+        question = add_question(self)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(question['response'].status_code, 200)
+        self.assertTrue(question['data']['question_id'])
 
     def test_d_adding_with_wrong_data(self):
         response = self.client().post(
@@ -194,17 +247,18 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Bad Request')
 
     def test_n_adding_new_user(self):
-        response = self.client().post('/users', json=self.user)
-        data = json.loads(response.data)
+        user = add_user(self)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['id'], 1)
-        self.assertEqual(data['username'], 'John')
-        self.assertTrue(data['token'])
+        self.assertEqual(user['response'].status_code, 200)
+        self.assertEqual(user['data']['username'],
+                         user['user']['username'])
+        self.assertTrue(user['data']['token'])
 
     def test_o_adding_already_added_user(self):
+        user = add_user(self)
+
         response = self.client().post(
-            '/users', json={'username': 'John', 'password': 'secret'})
+            '/users', json={'username': user['data']['username'], 'password': 'secret'})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 400)
@@ -212,17 +266,21 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Bad Request')
 
     def test_p_user_login(self):
+        user = add_user(self)
+
         response = self.client().post(
-            '/users/login', json={'username': 'John', 'password': 'secret'})
+            '/users/login', json={'username': user['data']['username'], 'password': user['user']['password']})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['username'], 'John')
+        self.assertEqual(data['username'], user['data']['username'])
         self.assertTrue(data['token'])
 
     def test_q_user_wrong_password(self):
+        user = add_user(self)
+
         response = self.client().post(
-            '/users/login', json={'username': 'John', 'password': 'seet'})
+            '/users/login', json={'username': user['data']['username'], 'password': 'seet'})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 401)
@@ -230,13 +288,18 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Unauthorized')
 
     def test_t_update_user_score(self):
-        response_from_login = self.client().post('/users/login', json=self.user)
+        user = add_user(self)
+        question = add_question(self)
+
+        response_from_login = self.client().post(
+            '/users/login', json=user['user'])
         response_data = json.loads(response_from_login.data)
         user_token = response_data['token']
+
         response = self.client().patch(
-            '/users/John',
+            f'/users/{user["data"]["username"]}',
             json={
-                'question_id': 24},
+                'question_id': question['data']['question_id']},
             headers={
                 'Authorization': f"Bearer {user_token}"})
         data = json.loads(response.data)
@@ -246,7 +309,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['score'])
 
     def test_u_update_score_with_invalid_token(self):
-        response = self.client().patch('/users/jbaba', json={'question_id': 1}, headers={
+        response = self.client().patch('/users/jbaba', json={'question_id': 23}, headers={
             'Authorization': f"Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImpiYWJhIiwiZXhwIjoxNjYxNzU1NzEwfQ.2gGXfrEQZPd1HFtORbhyTjUWdgC-LCEh_RjvxzTWc9N"})
         data = json.loads(response.data)
 
@@ -255,16 +318,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Unauthorized')
 
     def test_v_getting_a_user(self):
-        response_from_login = self.client().post('/users/login', json=self.user)
-        response_data = json.loads(response_from_login.data)
-        user_token = response_data['token']
-        response = self.client().get('/users/John',
-                                     headers={'Authorization': f"Bearer {user_token}"})
+        user = add_user(self)
+        response = self.client().get(f'/users/{user["data"]["username"]}',
+                                     headers={'Authorization': f"Bearer {user['data']['token']}"})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(data['username'])
-        self.assertTrue(len(data['answered_questions']))
+        self.assertEqual(len(data['answered_questions']), 0)
 
     def test_w_getting_user_with_invalid_token(self):
         response = self.client().get(
@@ -278,11 +339,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Unauthorized')
 
     def test_y_deleting_question(self):
-        response = self.client().delete('/questions/24')
+        question = add_question(self)
+
+        response = self.client().delete(
+            f'/questions/{question["data"]["question_id"]}')
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['deleted_question_id'], 24)
+        self.assertEqual(data['deleted_question_id'],
+                         question['data']['question_id'])
 
     def test_z_deleting_invalid_question(self):
         response = self.client().delete('/questions/1000')

@@ -225,7 +225,9 @@ def create_app(test_config=None):
                 abort(422)
             question.insert()
 
-            return jsonify({})
+            return jsonify({
+                'question_id': question.id
+            })
         except Exception as e:
             if isinstance(e, HTTPException):
                 abort(e.code)
